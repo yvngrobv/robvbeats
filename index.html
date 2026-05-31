@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ROBV BEATSHOP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+
+  <!-- ═══════════════════════════════════════════════
+       GOOGLE ANALYTICS (estadísticas)
+       1. Ve a analytics.google.com y crea una cuenta
+       2. Sustituye G-XXXXXXXXXX por tu ID real
+       3. Descomenta las líneas quitando los símbolos
+  ════════════════════════════════════════════════ -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZKEV64GZY4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-ZKEV64GZY4');
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0a0a0a;
+      color: #e0e0e0;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Fondo nubes ── */
+    .clouds {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 30%, rgba(30,30,40,0.85) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 35% at 75% 20%, rgba(20,20,35,0.9)  0%, transparent 65%),
+        radial-gradient(ellipse 70% 50% at 50% 70%, rgba(25,25,38,0.8)  0%, transparent 60%),
+        radial-gradient(ellipse 40% 30% at 10% 80%, rgba(18,18,30,0.75) 0%, transparent 65%),
+        radial-gradient(ellipse 55% 40% at 90% 75%, rgba(22,22,36,0.85) 0%, transparent 60%);
+      filter: blur(28px);
+    }
+    .clouds2 {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 25% at 40% 10%, rgba(15,15,25,0.6)  0%, transparent 70%),
+        radial-gradient(ellipse 45% 55% at 85% 50%, rgba(20,20,32,0.7)  0%, transparent 60%),
+        radial-gradient(ellipse 60% 30% at  5% 55%, rgba(18,18,28,0.65) 0%, transparent 65%);
+      filter: blur(40px);
+    }
+
+    .content { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; }
+
+    /* ── Hero ── */
+    .hero { padding: 2rem 1.5rem 1.75rem; border-bottom: 0.5px solid #1e1e1e; }
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 56px; color: #f2f2f2;
+      letter-spacing: 4px; line-height: 1;
+    }
+
+    /* ── Filtros dinámicos ── */
+    .filters {
+      display: flex; gap: 6px;
+      padding: 1rem 1.5rem;
+      border-bottom: 0.5px solid #181818;
+      flex-wrap: wrap;
+    }
+    .chip {
+      font-size: 11px; padding: 4px 12px; border-radius: 20px;
+      border: 0.5px solid #2a2a2a; background: transparent; color: #666;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .chip.active, .chip:hover { border-color: #555; color: #ddd; background: rgba(255,255,255,0.05); }
+
+    .section-lbl { padding: 1.2rem 1.5rem 0.5rem; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #333; }
+
+    /* ── Filas beats ── */
+    .beat-row {
+      display: grid; grid-template-columns: 44px 1fr auto;
+      align-items: center; gap: 12px;
+      padding: 0.85rem 1.5rem;
+      border-bottom: 0.5px solid #141414;
+      transition: background 0.12s;
+    }
+    .beat-row { cursor: pointer; }
+    .beat-row:hover  { background: rgba(255,255,255,0.03); }
+    .beat-row.expanded { background: rgba(255,255,255,0.04); }
+
+    .beat-num { font-size: 12px; color: #333; text-align: center; font-variant-numeric: tabular-nums; }
+    .beat-row:hover .beat-num, .beat-row.expanded .beat-num { display: none; }
+
+    .play-btn {
+      display: none; width: 34px; height: 34px; border-radius: 50%;
+      background: #e0e0e0; border: none; cursor: pointer;
+      align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .beat-row:hover .play-btn, .beat-row.expanded .play-btn { display: flex; }
+    .play-btn i { font-size: 13px; color: #0d0d0d; margin-left: 2px; }
+
+    .beat-info { min-width: 0; }
+    .beat-name { font-size: 13px; font-weight: 500; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .beat-name .atags { color: #555; font-weight: 400; font-size: 12px; }
+    .beat-meta { font-size: 11px; color: #444; margin-top: 2px; }
+    .beat-taglist { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
+    .btag { font-size: 10px; padding: 2px 7px; border-radius: 3px; background: rgba(255,255,255,0.04); color: #555; border: 0.5px solid #222; }
+
+    .beat-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .beat-price { font-size: 11px; color: #555; white-space: nowrap; }
+    .expand-btn {
+      background: none; border: 0.5px solid #2a2a2a; border-radius: 4px;
+      color: #555; cursor: pointer; padding: 3px 8px; font-size: 11px;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .expand-btn:hover { border-color: #555; color: #ccc; }
+
+    /* ── Panel licencias ── */
+    .license-panel {
+      display: none;
+      padding: 0.75rem 1.5rem 1.25rem 4.5rem;
+      background: rgba(255,255,255,0.02);
+      border-bottom: 0.5px solid #141414;
+    }
+    .license-panel.open { display: block; }
+
+    .lic-section-title { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #333; margin-bottom: 8px; }
+
+    .producers-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .prod-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 10px; border-radius: 20px;
+      border: 0.5px solid #2a2a2a; background: rgba(255,255,255,0.03);
+      color: #888; font-size: 11px; text-decoration: none; transition: all 0.15s;
+    }
+    .prod-pill:hover { border-color: #666; color: #e0e0e0; background: rgba(255,255,255,0.07); }
+    .prod-pill i { font-size: 12px; }
+
+    .lic-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; margin-bottom: 12px; }
+    .lic-card {
+      border: 0.5px solid #222; border-radius: 6px; padding: 10px 12px;
+      background: rgba(255,255,255,0.025); cursor: pointer; transition: all 0.15s;
+    }
+    .lic-card:hover, .lic-card.selected { border-color: #555; background: rgba(255,255,255,0.06); }
+    .lic-card.selected { border-color: #aaa; }
+    .lic-type   { font-size: 11px; color: #aaa; font-weight: 500; }
+    .lic-detail { font-size: 10px; color: #444; margin-top: 2px; }
+    .lic-price  { font-size: 14px; color: #e0e0e0; font-weight: 500; margin-top: 4px; }
+
+    .tag-notice {
+      font-size: 10px; color: #333; margin-bottom: 12px;
+      padding: 7px 10px; border: 0.5px solid #1e1e1e;
+      border-radius: 5px; background: rgba(255,255,255,0.02);
+    }
+
+    .contact-block { margin-top: 4px; }
+    .contact-label { font-size: 11px; color: #444; margin-bottom: 8px; line-height: 1.5; }
+    .contact-row { display: flex; gap: 8px; }
+    .contact-btn {
+      flex: 1; padding: 8px; border-radius: 6px;
+      border: 0.5px solid #333; background: rgba(255,255,255,0.04);
+      color: #aaa; font-size: 12px; cursor: pointer; transition: all 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      text-decoration: none;
+    }
+    .contact-btn:hover { border-color: #666; color: #e0e0e0; background: rgba(255,255,255,0.08); }
+
+    /* ── Player fijo ── */
+    .player-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      display: none;
+      background: rgba(10,10,10,0.94); backdrop-filter: blur(16px);
+      border-top: 0.5px solid #222;
+      padding: 10px 1.5rem;
+      align-items: center; gap: 12px;
+    }
+    .player-bar.visible { display: flex; }
+    .player-info { min-width: 0; flex: 0 0 auto; max-width: 160px; }
+    .player-name { font-size: 12px; font-weight: 500; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .player-sub  { font-size: 10px; color: #444; }
+    .prog-track  { flex: 1; height: 2px; background: #222; border-radius: 2px; cursor: pointer; }
+    .prog-fill   { height: 100%; background: #c0c0c0; border-radius: 2px; width: 0%; transition: width 0.1s linear; }
+    .time-lbl    { font-size: 10px; color: #444; font-variant-numeric: tabular-nums; min-width: 28px; }
+    .stop-btn    { background: none; border: none; color: #555; cursor: pointer; font-size: 20px; padding: 0; }
+    .stop-btn:hover { color: #ccc; }
+
+    #catalog-wrap { padding-bottom: 64px; }
+
+    @media (max-width: 480px) {
+      .hero-title { font-size: 40px; }
+      .lic-grid { grid-template-columns: 1fr; }
+      .beat-row { grid-template-columns: 36px 1fr auto; padding: 0.75rem 1rem; }
+      .license-panel { padding-left: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="clouds"></div>
+  <div class="clouds2"></div>
+
+  <div class="content">
+    <div class="hero">
+      <div class="hero-title">ROBV BEATSHOP</div>
+    </div>
+    <div class="filters" id="filters"></div>
+    <div class="section-lbl">Catálogo</div>
+    <div id="catalog-wrap"><div id="catalog"></div></div>
+  </div>
+
+  <div class="player-bar" id="player-bar">
+    <div class="player-info">
+      <div class="player-name" id="pb-name">—</div>
+      <div class="player-sub"  id="pb-sub">—</div>
+    </div>
+    <span class="time-lbl" id="pb-cur">0:00</span>
+    <div class="prog-track" id="prog-track">
+      <div class="prog-fill" id="pb-fill"></div>
+    </div>
+    <span class="time-lbl" id="pb-dur">0:35</span>
+    <button class="stop-btn" onclick="stopPlay()" aria-label="Detener reproducción">
+      <i class="ti ti-player-stop"></i>
+    </button>
+  </div>
+
+  <audio id="aud"></audio>
+
+  <script>
+    /* ════════════════════════════════════════════════════
+       CONFIGURACIÓN — edita solo esta sección
+    ════════════════════════════════════════════════════ */
+    const INSTAGRAM   = "https://instagram.com/yvngrobv";
+    const EMAIL       = "yvngrobvcontact@gmail.com";
+    const PREV_SECS   = 35;  // duración del preview en segundos
+
+    /*
+      Formato de cada beat:
+      ─────────────────────
+      raw:    "nombre bpm @yvngrobv"                     → solo
+              "nombre bpm @yvngrobv @otroprod"           → 2 productores
+              "nombre bpm @yvngrobv @prod2 @prod3"       → 3 productores
+      tags:   array de etiquetas — generan los filtros automáticamente
+      file:   nombre del MP3 dentro de la carpeta /previews/
+      colabs: array de handles — se construye el enlace de Instagram solo
+              (si el handle tiene puntos como @roos.exe → instagram.com/roosxe)
+    */
+    const RAW_BEATS = [
+  { id: 1, raw:"actionstar 142 @yvngrobv", tags:["Trap","Crank"], file:"actionstar.mp3", colabs:["@yvngrobv"] },
+  { id: 2, raw:"arrhythmia 140 @yvngrobv", tags:["Trap","Crank"], file:"arrhythmia.mp3", colabs:["@yvngrobv"] },
+  { id: 3, raw:"asshole 140 @yvngrobv", tags:["Trap","Atlanta"], file:"asshole.mp3", colabs:["@yvngrobv"] },
+  { id: 4, raw:"beanbag 148 @yvngrobv", tags:["Trap","NewWave"], file:"beanbag.mp3", colabs:["@yvngrobv"] },
+  { id: 5, raw:"bender 149 @yvngrobv @jtrn.the.producer", tags:["Trap","Chill"], file:"bender.mp3", colabs:["@yvngrobv","@jtrn.the.producer"] },
+  { id: 6, raw:"birds 121 @yvngrobv @roos.exe", tags:["Trap","Atlanta","Old","Melancholic"], file:"birds.mp3", colabs:["@yvngrobv","@roos.exe"] },
+  { id: 7, raw:"biting 166 @yvngrobv", tags:["Trap","NewWave"], file:"biting.mp3", colabs:["@yvngrobv"] },
+  { id: 8, raw:"boo 131 @yvngrobv", tags:["Trap","NewWave"], file:"boo.mp3", colabs:["@yvngrobv"] },
+  { id: 9, raw:"boost ts 140 @yvngrobv @roos.exe", tags:["Trap","Unique"], file:"boost_ts.mp3", colabs:["@yvngrobv","@roos.exe"] },
+  { id:10, raw:"bubbles 152 @yvngrobv", tags:["Trap","Weird"], file:"bubbles.mp3", colabs:["@yvngrobv"] },
+  { id:11, raw:"can i help 148 @yvngrobv @roos.exe @yoyo.stay", tags:["Trap","Chill"], file:"can_i_help.mp3", colabs:["@yvngrobv","@roos.exe","@yoyo.stay"] },
+  { id:12, raw:"century 147 @yvngrobv", tags:["Trap","Atlanta"], file:"century.mp3", colabs:["@yvngrobv"] },
+  { id:13, raw:"chainlink 128 @yvngrobv", tags:["Trap","NewWave","Weird"], file:"chainlink.mp3", colabs:["@yvngrobv"] },
+  { id:14, raw:"changed 164 @yvngrobv @prodnaxy", tags:["Trap","NewWave"], file:"changed.mp3", colabs:["@yvngrobv","@prodnaxy"] },
+  { id:15, raw:"chapters 141 @yvngrobv @harrybass__", tags:["Trap","Atlanta"], file:"chapters.mp3", colabs:["@yvngrobv","@harrybass__"] },
+  { id:16, raw:"chillaso 169 @yvngrobv @roos.exe", tags:["Trap","Atlanta","Chill"], file:"chillaso.mp3", colabs:["@yvngrobv","@roos.exe"] },
+  { id:17, raw:"delirious 156 @yvngrobv @dantespromise", tags:["Trap","Chill","Unique"], file:"delirious.mp3", colabs:["@yvngrobv","@dantespromise"] },
+  { id:18, raw:"dior dior 135 @yvngrobv", tags:["Trap","Atlanta","NewWave"], file:"dior_dior.mp3", colabs:["@yvngrobv"] },
+  { id:19, raw:"dirty soup 162 @yvngrobv @roos.exe @yoyo.stay", tags:["Trap","Atlanta","Chill"], file:"dirty_soup.mp3", colabs:["@yvngrobv","@roos.exe","@yoyo.stay"] },
+  { id:20, raw:"dirty sprite 147 @yvngrobv", tags:["Trap","NewWave","Weird"], file:"dirty_sprite.mp3", colabs:["@yvngrobv"] },
+  { id:21, raw:"do my tang 148 @yvngrobv", tags:["Trap","Atlanta","Chill","Melancholic"], file:"do_my_tang.mp3", colabs:["@yvngrobv"] },
+  { id:22, raw:"downfall 138 @yvngrobv", tags:["Trap","Atlanta","NewWave","Chill"], file:"downfall.mp3", colabs:["@yvngrobv"] },
+  { id:23, raw:"dramatic 150 @yvngrobv", tags:["Trap","NewWave"], file:"dramatic.mp3", colabs:["@yvngrobv"] },
+  { id:24, raw:"emotes 140 @yvngrobv @amltomi", tags:["Trap","Atlanta","Melancholic"], file:"emotes.mp3", colabs:["@yvngrobv","@amltomi"] },
+  { id:25, raw:"even more 139 @yvngrobv", tags:["Trap","Sstepteam"], file:"even_more.mp3", colabs:["@yvngrobv"] },
+  { id:26, raw:"evolution 144 @yvngrobv", tags:["Trap","Melancholic","Chill"], file:"evolution.mp3", colabs:["@yvngrobv"] },
+  { id:27, raw:"failsafe 147 @yvngrobv", tags:["Trap","Atlanta","NewWave","Unique"], file:"failsafe.mp3", colabs:["@yvngrobv"] },
+  { id:28, raw:"feels weird 143 @yvngrobv", tags:["Trap","Unique","Chill"], file:"feels_weird.mp3", colabs:["@yvngrobv"] },
+  { id:29, raw:"getting bad 128 @yvngrobv", tags:["Trap","Chill","Melancholic"], file:"getting_bad.mp3", colabs:["@yvngrobv"] },
+  { id:30, raw:"gle 143 @yvngrobv", tags:["Trap","Crank"], file:"gle.mp3", colabs:["@yvngrobv"] },
+  { id:31, raw:"goodbye 147 @yvngrobv", tags:["Trap","NewWave","Weird","Unique"], file:"goodbye.mp3", colabs:["@yvngrobv"] },
+  { id:32, raw:"goofball 140 @yvngrobv @jtrn.the.producer", tags:["Trap","Atlanta","NewWave","Unique","Chill"], file:"goofball.mp3", colabs:["@yvngrobv","@jtrn.the.producer"] },
+  { id:33, raw:"gunclick 145 @yvngrobv @roos.exe", tags:["Trap","Atlanta","Old","Unique"], file:"gunclick.mp3", colabs:["@yvngrobv","@roos.exe"] },
+  { id:34, raw:"how do u do 140 @yvngrobv @prodinuya @desm9s", tags:["Trap","Atlanta","Unique"], file:"how_do_u_do.mp3", colabs:["@yvngrobv","@prodinuya","@desm9s"] },
+  { id:35, raw:"hurry 132 @yvngrobv", tags:["Other Genres","House","Club"], file:"hurry.mp3", colabs:["@yvngrobv"] },
+  { id:36, raw:"i just wanna 178 @yvngrobv @roos.exe", tags:["Trap","Old","Unique","Melancholic"], file:"i_just_wanna.mp3", colabs:["@yvngrobv","@roos.exe"] },
+  { id:37, raw:"idea 134 @yvngrobv", tags:["Trap","Atlanta","Chill","Unique"], file:"idea.mp3", colabs:["@yvngrobv"] },
+  { id:38, raw:"im sorry! 160 @yvngrobv", tags:["Trap","Atlanta","NewWave"], file:"im_sorry.mp3", colabs:["@yvngrobv"] },
+  { id:39, raw:"insinuation 140 @yvngrobv", tags:["Trap","Atlanta","Chill"], file:"insinuation.mp3", colabs:["@yvngrobv"] },
+  { id:40, raw:"junky 157 @yvngrobv @harrybass__", tags:["Trap","Jerk","Weird"], file:"junky.mp3", colabs:["@yvngrobv","@harrybass__"] },
+  { id:41, raw:"keepitquiet 140 @yvngrobv @oskiwayy", tags:["Trap","Atlanta"], file:"keepitquiet.mp3", colabs:["@yvngrobv","@oskiwayy"] },
+  { id:42, raw:"killa 162 @yvngrobv @jtrn.the.producer", tags:["Trap","Atlanta","Unique"], file:"killa.mp3", colabs:["@yvngrobv","@jtrn.the.producer"] },
+  { id:43, raw:"lab ratz 133 @yvngrobv @prodinuya @desm9s", tags:["Trap","Weird","NewWave"], file:"lab_ratz.mp3", colabs:["@yvngrobv","@prodinuya","@desm9s"] },
+  { id:44, raw:"learning curve 115 @yvngrobv @prodinuya @desm9s", tags:["Trap","Atlanta","Weird"], file:"learning_curve.mp3", colabs:["@yvngrobv","@prodinuya","@desm9s"] },
+  { id:45, raw:"lesson 152 @yvngrobv", tags:["Trap","Atlanta","NewWave"], file:"lesson.mp3", colabs:["@yvngrobv"] },
+  { id:46, raw:"lineman 146 @yvngrobv", tags:["Trap","Atlanta","NewWave"], file:"lineman.mp3", colabs:["@yvngrobv"] },
+  { id:47, raw:"lov3 155 @yvngrobv @jtrn.the.producer", tags:["Trap","Jerk","Unique","Chill"], file:"lov3.mp3", colabs:["@yvngrobv","@jtrn.the.producer"] },
+  { id:48, raw:"loveme 145 @yvngrobv", tags:["Trap","Sstepteam","Chill"], file:"loveme.mp3", colabs:["@yvngrobv"] },
+  { id:49, raw:"malibu 144 @yvngrobv @harrybass__", tags:["Trap","Chill","NewWave"], file:"malibu.mp3", colabs:["@yvngrobv","@harrybass__"] },
+  { id:50, raw:"manny pacquiao 87 @yvngrobv @yoyo.stay", tags:["R&B","Swag","Pharrell"], file:"manny_pacquiao.mp3", colabs:["@yvngrobv","@yoyo.stay"] },
+  { id:51, raw:"minimize 152 @yvngrobv @yoyo.stay", tags:["Trap","Chill","NewWave"], file:"minimize.mp3", colabs:["@yvngrobv","@yoyo.stay"] },
+  { id:52, raw:"mirage 150 @yvngrobv", tags:["Trap","Atlanta","NewWave"], file:"mirage.mp3", colabs:["@yvngrobv"] },
+  { id:53, raw:"no no 167 @yvngrobv @youngstirr", tags:["Trap","Crank"], file:"no_no.mp3", colabs:["@yvngrobv","@youngstirr"] },
+  { id:54, raw:"nobody wants u 138 @yvngrobv", tags:["Trap","Atlanta","Chill"], file:"nobody_wants_u.mp3", colabs:["@yvngrobv"] },
+  { id:55, raw:"offdeck 165 @yvngrobv @n4vyn4vy", tags:["Trap","Atlanta","Old"], file:"offdeck.mp3", colabs:["@yvngrobv","@n4vyn4vy"] },
+  { id:56, raw:"official member 164 @yvngrobv @emcccee", tags:["Trap","Atlanta","Crank"], file:"official_member.mp3", colabs:["@yvngrobv","@emcccee"] },
+  { id:57, raw:"okay 141 @yvngrobv @jtrn.the.producer", tags:["Trap","Atlanta","Unique"], file:"okay_141.mp3", colabs:["@yvngrobv","@jtrn.the.producer"] },
+  { id:58, raw:"okay 155 @yvngrobv @1thiagg", tags:["Trap","Atlanta"], file:"okay_155.mp3", colabs:["@yvngrobv","@1thiagg"] },
+  { id:59, raw:"on dat 117 @yvngrobv @prodinuya @desm9s", tags:["Trap","Atlanta","Unique"], file:"on_dat.mp3", colabs:["@yvngrobv","@prodinuya","@desm9s"] },
+  { id:60, raw:"one more day 136 @yvngrobv", tags:["Trap","Atlanta","Old","Chill"], file:"one_more_day.mp3", colabs:["@yvngrobv"] },
+  { id:61, raw:"opening 140 @yvngrobv", tags:["Trap","Sstepteam","Melancholic"], file:"opening.mp3", colabs:["@yvngrobv"] },
+  { id:62, raw:"ouch 150 @yvngrobv", tags:["Trap","Atlanta","Chill","Melancholic"], file:"ouch.mp3", colabs:["@yvngrobv"] },
+  { id:63, raw:"paparazzi leaks 142 @yvngrobv", tags:["Trap","Crank","Atlanta"], file:"paparazzi_leaks.mp3", colabs:["@yvngrobv"] },
+  { id:64, raw:"pink & blue 114 @yvngrobv @roos.exe", tags:["Trap","Old","Chill"], file:"pink_blue.mp3", colabs:["@yvngrobv","@roos.exe"] },
+  { id:65, raw:"pitch bender 164 @yvngrobv @roos.exe", tags:["Trap","Atlanta","NoAutotune"], file:"pitch_bender.mp3", colabs:["@yvngrobv","@roos.exe"] },
+  { id:66, raw:"poet 157 @yvngrobv @harrybass__", tags:["Trap","Jerk"], file:"poet.mp3", colabs:["@yvngrobv","@harrybass__"] },
+  { id:67, raw:"pull up 140 @yvngrobv @near4k_", tags:["Trap","NewWave","Atlanta"], file:"pull_up.mp3", colabs:["@yvngrobv","@near4k_"] },
+  { id:68, raw:"pure 143 @yvngrobv", tags:["Trap","Sstepteam"], file:"pure.mp3", colabs:["@yvngrobv"] },
+  { id:69, raw:"pussy wet 156 @yvngrobv", tags:["Trap","Weird","NewWave"], file:"pussy_wet.mp3", colabs:["@yvngrobv"] },
+  { id:70, raw:"rari 149 @yvngrobv @near4k_", tags:["Trap","Atlanta","NewWave"], file:"rari.mp3", colabs:["@yvngrobv","@near4k_"] },
+  { id:71, raw:"ride 147 @yvngrobv", tags:["Trap","Chill"], file:"ride.mp3", colabs:["@yvngrobv"] },
+  { id:72, raw:"sametime 138 @yvngrobv", tags:["Trap","NewWave","Atlanta","Chill"], file:"sametime.mp3", colabs:["@yvngrobv"] },
+  { id:73, raw:"scarlet 162 @yvngrobv @roos.exe @yoyo.stay", tags:["Trap","Jerk"], file:"scarlet.mp3", colabs:["@yvngrobv","@roos.exe","@yoyo.stay"] },
+  { id:74, raw:"scenic 156 @yvngrobv @harrybass__", tags:["Trap","Chill"], file:"scenic.mp3", colabs:["@yvngrobv","@harrybass__"] },
+  { id:75, raw:"screams 132 @yvngrobv", tags:["Trap","Atlanta","Chill","Melancholic"], file:"screams.mp3", colabs:["@yvngrobv"] },
+  { id:76, raw:"shamone 109 @yvngrobv @yoyostay", tags:["Other Genres","80s","Disco"], file:"shamone.mp3", colabs:["@yvngrobv","@yoyostay"] },
+  { id:77, raw:"sickness 143 @yvngrobv", tags:["Trap","Atlanta","NewWave"], file:"sickness.mp3", colabs:["@yvngrobv"] },
+  { id:78, raw:"sincero 138 @yvngrobv", tags:["Trap","Unique","Chill","Melancholic"], file:"sincero.mp3", colabs:["@yvngrobv"] },
+  { id:79, raw:"soulja 137 @yvngrobv", tags:["Trap","Atlanta","NewWave","Unique"], file:"soulja.mp3", colabs:["@yvngrobv"] },
+  { id:80, raw:"sprinkles 127 @yvngrobv", tags:["Trap","NewWave","Atlanta","Weird"], file:"sprinkles.mp3", colabs:["@yvngrobv"] },
+  { id:81, raw:"ss 148 @yvngrobv", tags:["Trap","Sstepteam"], file:"ss.mp3", colabs:["@yvngrobv"] },
+  { id:82, raw:"standard 158 @yvngrobv @jtrn.the.producer", tags:["Trap","Atlanta"], file:"standard.mp3", colabs:["@yvngrobv","@jtrn.the.producer"] },
+  { id:83, raw:"stop 127 @yvngrobv @oskiwayy", tags:["Trap","Chill"], file:"stop.mp3", colabs:["@yvngrobv","@oskiwayy"] },
+  { id:84, raw:"stop drop n roll 130 @yvngrobv @prodinuya @desm9s", tags:["Trap","Weird","Atlanta","Unique"], file:"stop_drop_n_roll.mp3", colabs:["@yvngrobv","@prodinuya","@desm9s"] },
+  { id:85, raw:"summer is here 148 @yvngrobv @jtrn.the.producer", tags:["Trap","Chill"], file:"summer_is_here.mp3", colabs:["@yvngrobv","@jtrn.the.producer"] },
+  { id:86, raw:"suspense 148 @yvngrobv", tags:["Trap","Chill","NewWave"], file:"suspense.mp3", colabs:["@yvngrobv"] },
+  { id:87, raw:"tell em 150 @yvngrobv @harrybass__", tags:["Trap","NewWave","Chill"], file:"tell_em.mp3", colabs:["@yvngrobv","@harrybass__"] },
+  { id:88, raw:"ten bands 153 @yvngrobv", tags:["Trap","Crank"], file:"ten_bands.mp3", colabs:["@yvngrobv"] },
+  { id:89, raw:"thankful 149 @yvngrobv @roos.exe", tags:["Trap","Atlanta","NewWave","Chill"], file:"thankful.mp3", colabs:["@yvngrobv","@roos.exe"] },
+  { id:90, raw:"this far 155 @yvngrobv @harrybass__", tags:["Trap","Unique","Chill"], file:"this_far.mp3", colabs:["@yvngrobv","@harrybass__"] },
+  { id:91, raw:"thunder 117 @yvngrobv", tags:["Trap","Atlanta","NewWave","Chill"], file:"thunder.mp3", colabs:["@yvngrobv"] },
+  { id:92, raw:"trolly 116 @yvngrobv @roos.exe", tags:["Trap","Chill","Unique"], file:"trolly.mp3", colabs:["@yvngrobv","@roos.exe"] },
+  { id:93, raw:"tryin to get the feeling again 143 @yvngrobv", tags:["Trap","Sstepteam"], file:"tryin_to_get_the_feeling_again.mp3", colabs:["@yvngrobv"] },
+  { id:94, raw:"ttico 147 @yvngrobv", tags:["Trap","Unique","Weird","Chill"], file:"ttico.mp3", colabs:["@yvngrobv"] },
+  { id:95, raw:"vanish 141 @yvngrobv", tags:["Trap","Chill"], file:"vanish.mp3", colabs:["@yvngrobv"] },
+  { id:96, raw:"vip 140 @yvngrobv", tags:["Trap","Atlanta","NewWave"], file:"vip.mp3", colabs:["@yvngrobv"] },
+  { id:97, raw:"wask 146 @yvngrobv", tags:["Trap","NewWave","Weird"], file:"wask.mp3", colabs:["@yvngrobv"] },
+  { id:98, raw:"whip whip 150 @yvngrobv", tags:["Trap","Sstepteam","Chill"], file:"whip_whip.mp3", colabs:["@yvngrobv"] },
+  { id:99, raw:"who won 134 @yvngrobv", tags:["Trap","Melancholic"], file:"who_won.mp3", colabs:["@yvngrobv"] },
+  { id:100, raw:"wile 32 @yvngrobv @basedthomy", tags:["Trap","Atlanta","Chill"], file:"wile.mp3", colabs:["@yvngrobv","@basedthomy"] },
+];
+    /* ════════════════════════════════════════════════════ */
+
+
+    /* ── Helpers ── */
+    function handleToIG(handle) {
+      const slug = handle.replace('@','');
+      return `https://instagram.com/${slug}`;
+    }
+
+    function getLicenses(collabCount) {
+      if (collabCount === 0) return [
+        { id:'mp3-s', label:'MP3', detail:'Solo @yvngrobv', price:'30€' },
+        { id:'wav-s', label:'WAV', detail:'Solo @yvngrobv', price:'60€' }
+      ];
+      if (collabCount === 1) return [
+        { id:'mp3-2', label:'MP3', detail:'2 productores', price:'40€' },
+        { id:'wav-2', label:'WAV', detail:'2 productores', price:'80€' }
+      ];
+      return [
+        { id:'mp3-3', label:'MP3', detail:'3+ productores', price:'45€' },
+        { id:'wav-3', label:'WAV', detail:'3+ productores', price:'90€' }
+      ];
+    }
+
+    function parseBeat(b) {
+      const atags      = b.raw.match(/@\S+/g) || [];
+      const collabTags = atags.filter(t => t !== '@yvngrobv');
+      const isCollab   = collabTags.length > 0;
+      const noAt       = b.raw.replace(/@\S+/g, '').trim();
+      const bpmMatch   = noAt.match(/\b(\d{2,3})\b/);
+      const bpm        = bpmMatch ? bpmMatch[1] : '?';
+      const name       = noAt.replace(/\b\d{2,3}\b/, '').trim().toUpperCase();
+      const licenses   = getLicenses(collabTags.length);
+      return { ...b, name, bpm, atags, isCollab, collabTags, licenses, fromPrice: licenses[0].price };
+    }
+
+    const beats = RAW_BEATS.map(parseBeat);
+
+    /* ── Filtros dinámicos ── */
+    function buildFilters() {
+      const all = new Set();
+      beats.forEach(b => b.tags.forEach(t => all.add(t)));
+      document.getElementById('filters').innerHTML =
+        `<div class="chip active" onclick="filterBeats('all',this)">All</div>`
+        + [...all].map(t => `<div class="chip" onclick="filterBeats('${t}',this)">${t}</div>`).join('');
+    }
+
+    let currentFilter = 'all', currentPlay = null, expandedId = null;
+    let selectedLic = {}, timer = null, fakeSec = 0;
+
+    function filterBeats(g, el) {
+      currentFilter = g;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      render();
+    }
+
+    /* ── Render principal ── */
+    function render() {
+      const filtered = beats.filter(b => currentFilter === 'all' || b.tags.includes(currentFilter));
+
+      document.getElementById('catalog').innerHTML = filtered.map((b, i) => {
+
+        /* Pastillas de productores */
+        const pills = (b.colabs || []).map(handle =>
+          `<a class="prod-pill" href="${handleToIG(handle)}" target="_blank" rel="noopener">
+            <i class="ti ti-brand-instagram" aria-hidden="true"></i>${handle}
+          </a>`
+        ).join('');
+
+        /* Licencia seleccionada → mensaje email */
+        const selLic   = b.licenses.find(l => l.id === selectedLic[b.id]);
+        const licLabel = selLic
+          ? `${selLic.label} ${selLic.detail} (${selLic.price})`
+          : '(sin licencia seleccionada)';
+
+        const mailSub  = encodeURIComponent(`Beat: ${b.name} — ROBV BEATSHOP`);
+        const mailBody = encodeURIComponent(
+          `Hola,\n\nMe interesa el beat "${b.name}" con licencia ${licLabel}. ¿Está disponible?\n\nGracias`
+        );
+
+        return `
+        <div class="beat-row${expandedId === b.id ? ' expanded' : ''}" id="row-${b.id}" onclick="handleRowClick(event,${b.id})">
+          <div style="display:flex;align-items:center;justify-content:center;">
+            <span class="beat-num">${i + 1}</span>
+            <button class="play-btn" onclick="togglePlay(${b.id})" aria-label="Reproducir ${b.name}">
+              <i class="ti ${currentPlay === b.id ? 'ti-player-pause' : 'ti-player-play'}"></i>
+            </button>
+          </div>
+          <div class="beat-info">
+            <div class="beat-name">
+              ${b.name}
+              <span class="atags"> @yvngrobv${b.collabTags.length ? ' ' + b.collabTags.join(' ') : ''}</span>
+            </div>
+            <div class="beat-meta">${b.bpm} BPM${b.isCollab ? ' · Colaboración' : ' · Solo'}</div>
+            <div class="beat-taglist">${b.tags.map(t => `<span class="btag">${t}</span>`).join('')}</div>
+          </div>
+          <div class="beat-right">
+            <div class="beat-price">desde ${b.fromPrice}</div>
+            <span style="font-size:11px;color:#333;padding-right:4px;">${expandedId === b.id ? '▲' : '▼'}</span>
+          </div>
+        </div>
+
+        <div class="license-panel${expandedId === b.id ? ' open' : ''}" id="lic-${b.id}">
+          <div class="lic-section-title">Productores</div>
+          <div class="producers-row">${pills}</div>
+
+          <div class="lic-section-title">Elige tu licencia</div>
+          <div class="lic-grid">
+            ${b.licenses.map(l => `
+              <div class="lic-card${selectedLic[b.id] === l.id ? ' selected' : ''}" onclick="selectLic(${b.id},'${l.id}')">
+                <div class="lic-type">${l.label}</div>
+                <div class="lic-detail">${l.detail}</div>
+                <div class="lic-price">${l.price}</div>
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="tag-notice">Preview con tag cada pocos segundos. En la compra, el tag aparece solo una vez.</div>
+
+          <div class="contact-block">
+            <div class="contact-label">Selecciona una licencia y contáctame para confirmar la disponibilidad y cerrar la compra.</div>
+            <div class="contact-row">
+              <a class="contact-btn" href="${INSTAGRAM}" target="_blank" rel="noopener">
+                <i class="ti ti-brand-instagram" aria-hidden="true"></i> Instagram
+              </a>
+              <a class="contact-btn" href="mailto:${EMAIL}?subject=${mailSub}&body=${mailBody}">
+                <i class="ti ti-mail" aria-hidden="true"></i> Email
+              </a>
+            </div>
+          </div>
+        </div>`;
+
+      }).join('');
+    }
+
+    /* Clic en el rectángulo: si viene del play-btn lo ignora */
+    function handleRowClick(e, id) {
+      if (e.target.closest('.play-btn')) return;
+      toggleExpand(id);
+    }
+
+    function toggleExpand(id) {
+      expandedId = (expandedId === id) ? null : id;
+      render();
+      if (expandedId) {
+        setTimeout(() => {
+          const el = document.getElementById('lic-' + id);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 50);
+      }
+    }
+
+    function selectLic(beatId, licId) {
+      selectedLic[beatId] = licId;
+      render();
+    }
+
+    /* ── Player ── */
+    function togglePlay(id) {
+      if (currentPlay === id) { stopPlay(); return; }
+      if (timer) clearInterval(timer);
+      currentPlay = id; fakeSec = 0;
+
+      const b   = beats.find(x => x.id === id);
+      const aud = document.getElementById('aud');
+      aud.src   = `previews/${b.file}`;
+      aud.play().catch(() => {});
+
+      document.getElementById('player-bar').classList.add('visible');
+      document.getElementById('pb-name').textContent = b.name;
+      document.getElementById('pb-sub').textContent  = b.bpm + ' BPM · ' + (b.isCollab ? 'Colaboración' : 'Solo');
+      document.getElementById('pb-fill').style.width = '0%';
+      document.getElementById('pb-cur').textContent  = '0:00';
+      document.getElementById('pb-dur').textContent  = '0:' + String(PREV_SECS).padStart(2, '0');
+
+      /* Evento Google Analytics — beat escuchado */
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'play_beat', { beat_name: b.name, beat_id: b.id });
+      }
+
+      render();
+
+      timer = setInterval(() => {
+        fakeSec++;
+        if (fakeSec >= PREV_SECS) { stopPlay(); return; }
+        document.getElementById('pb-fill').style.width = (fakeSec / PREV_SECS * 100) + '%';
+        const m = Math.floor(fakeSec / 60), s = fakeSec % 60;
+        document.getElementById('pb-cur').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+      }, 1000);
+    }
+
+    function stopPlay() {
+      if (timer) clearInterval(timer);
+      document.getElementById('aud').pause();
+      currentPlay = null;
+      document.getElementById('player-bar').classList.remove('visible');
+      render();
+    }
+
+    document.getElementById('prog-track').addEventListener('click', function(e) {
+      if (!currentPlay) return;
+      const r   = this.getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+      fakeSec   = Math.round(pct * PREV_SECS);
+      document.getElementById('pb-fill').style.width = (pct * 100) + '%';
+      const aud = document.getElementById('aud');
+      if (aud.duration) aud.currentTime = pct * aud.duration;
+    });
+
+    buildFilters();
+    render();
+  </script>
+</body>
+</html>
